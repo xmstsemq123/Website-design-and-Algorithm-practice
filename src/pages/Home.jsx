@@ -6,12 +6,16 @@ export default function Home() {
 
   // 這裡整理了我們之前做過的所有題目，讓首頁看起來更豐富
   const problems = [
-    { id: 1, title: "基礎熱身", desc: "兩數之和 (Two Sum) 演算法練習", tag: "Algorithm", color: "text-blue-600 bg-blue-50 border-blue-200" },
-    { id: 2, title: "會動的盒子", desc: "DOM 操作與事件監聽 (Draggable)", tag: "DOM API", color: "text-green-600 bg-green-50 border-green-200" },
-    { id: 3, title: "非同步抽卡機", desc: "Promise 與 Async/Await 實作", tag: "Async", color: "text-yellow-600 bg-yellow-50 border-yellow-200" },
-    { id: 4, title: "幽靈列車", desc: "Linked List 資料結構 (Class)", tag: "Data Structure", color: "text-purple-600 bg-purple-50 border-purple-200" },
+    { id: 1, title: "會動的盒子", desc: "DOM 操作與事件監聽 (Draggable)", tag: "DOM API", color: "text-green-600 bg-green-50 border-green-200" },
+    { id: 2, title: "非同步抽卡機", desc: "Promise 與 Async/Await 實作", tag: "Async", color: "text-yellow-600 bg-yellow-50 border-yellow-200" },
+    { id: 3, title: "車廠訂單系統", desc: "OOP基礎實作：類別與繼承", tag: "Object Orientation Programming", color: "text-purple-600 bg-purple-50 border-purple-200" },
+    { id: 4, title: "幽靈列車調度員", desc: "Linked List 資料結構 (Class)", tag: "Data Structure", color: "text-purple-600 bg-purple-50 border-purple-200" },
     { id: 5, title: "RPG 角色卡片", desc: "CSS 偽類與偽元素應用", tag: "CSS", color: "text-pink-600 bg-pink-50 border-pink-200" },
-    { id: 6, title: "公會數據分析", desc: "Array Methods (Filter, Map, Reduce)", tag: "Array", color: "text-cyan-600 bg-cyan-50 border-cyan-200" },
+    { id: 6, title: "冒險者公會數據分析", desc: "Array Methods (Filter, Map, Reduce, ...)", tag: "Array", color: "text-cyan-600 bg-cyan-50 border-cyan-200" },
+    { id: 7, title: "AJAX的小試身手", desc: "AJAX 與非同步處理", tag: "AJAX, Async/Await", color: "text-cyan-600 bg-cyan-50 border-cyan-200" },
+    { id: 8, title: "時空留言板", desc: "進階的 AJAX 應用：包含資料處理、DOM渲染及時間排序 ", tag: "AJAX, DOM Render", color: "text-cyan-600 bg-cyan-50 border-cyan-200" },
+    { id: 9, title: "極速檔案檢索", desc: "Searching Algorithm", tag: "Search", color: "text-cyan-600 bg-cyan-50 border-cyan-200" },
+    { id: 10, title: "混沌檔案館", desc: "Sorting Algorithm", tag: "Sort", color: "text-cyan-600 bg-cyan-50 border-cyan-200" },
   ];
 
   return (
@@ -64,7 +68,7 @@ export default function Home() {
                   {prob.tag}
                 </span>
                 <span className="text-gray-300 font-mono text-2xl font-bold opacity-30 group-hover:opacity-100 group-hover:text-blue-600 transition-colors">
-                  0{prob.id}
+                  {prob.id < 10 ? '0' : ''}{prob.id}
                 </span>
               </div>
               

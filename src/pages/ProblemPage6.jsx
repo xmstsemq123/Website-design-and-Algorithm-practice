@@ -96,7 +96,7 @@ const ProblemPage6 = () => {
 }`}
                         </SyntaxHighlighter>
                     </div>
-                    <h3 className="text-xl font-bold text-cyan-900 mt-6 mb-4">📋 函式實作規格表 (API Specs)</h3>
+                    <h3 className="text-xl font-bold text-cyan-900 mt-6 mb-4">📋 函式實作規格表 （在analysis.js定義以下函式）</h3>
 
                     <div className="space-y-4">
                         {/* 任務 1: Filter */}

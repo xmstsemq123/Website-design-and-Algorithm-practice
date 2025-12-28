@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>混沌檔案館 - 效能測評</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        .console-text { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen p-8 flex justify-center items-start">
+
+    <div class="w-full max-w-3xl space-y-6">
+        
+        <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+            <header class="bg-rose-900/80 p-6 border-b border-rose-700/50 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        🔥 排序效能壓力測試
+                    </h1>
+                    <p class="text-rose-200 text-sm mt-1 opacity-80">資料量: 10,000 | 限制次數: 500,000</p>
+                </div>
+                <div id="status-badge" class="px-4 py-2 rounded-lg font-bold bg-gray-700 text-gray-400 text-sm">
+                    Ready
+                </div>
+            </header>
+
+            <div id="test-list" class="p-6 space-y-3"></div>
+
+            <div class="p-4 bg-gray-900/50 border-t border-gray-700 flex justify-end">
+                <button onclick="runTests()" class="px-6 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded shadow-lg font-bold transition-transform hover:scale-105">
+                    開始壓力測試
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-black rounded-xl shadow-lg border border-gray-700 overflow-hidden font-mono text-xs md:text-sm h-64 flex flex-col">
+            <div class="bg-gray-800 px-4 py-2 text-gray-400 border-b border-gray-700">Debug Console</div>
+            <div id="console-output" class="flex-1 overflow-y-auto p-4 space-y-1 console-text text-gray-300">
+                <div class="opacity-50">> System initialized.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="sorter.js"></script>
+
+    <script>
+        const testList = document.getElementById('test-list');
+        const consoleOutput = document.getElementById('console-output');
+        const statusBadge = document.getElementById('status-badge');
+        let hasError = false;
+
+        const N = 10000;
+        // O(N^2) 約 100,000,000 次 -> 絕對不允許
+        // O(N log N) 約 140,000 次 -> 加上一些 overhead 設寬一點
+        const MAX_OPS = 500000; 
+
+        // 1. 防止作弊：覆寫原生 sort
+        Array.prototype.sort = function() {
+            throw new Error("🚫 禁止使用 Array.prototype.sort！請自己實作演算法。");
+        };
+
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            const time = new Date().toLocaleTimeString('en-US', {hour12:false});
+            div.className = type === 'error' ? "text-red-400" : type === 'success' ? "text-green-400" : "text-gray-300";
+            div.innerHTML = `<span class="opacity-50">[${time}]</span> ${msg}`;
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        function addResult(title, passed, detail) {
+            const div = document.createElement('div');
+            div.className = `flex justify-between items-center p-3 rounded border ${passed ? "bg-green-900/20 border-green-800" : "bg-red-900/20 border-red-800"}`;
+            div.innerHTML = `
+                <div>
+                    <span class="font-bold ${passed ? 'text-green-400' : 'text-red-400'}">${passed ? '✔ PASS' : '✘ FAIL'}</span>
+                    <span class="text-gray-200 ml-2 font-bold">${title}</span>
+                </div>
+                <div class="text-xs ${passed ? 'text-rose-300' : 'text-red-300'}">${detail}</div>
+            `;
+            testList.appendChild(div);
+            if (!passed) hasError = true;
+        }
+
+        // 建立監控陣列
+        function createMonitoredArray(originalArray) {
+            let opsCount = 0;
+            const proxy = new Proxy(originalArray, {
+                get: function(target, prop) {
+                    if (!isNaN(prop)) opsCount++; // 讀取 array[i]
+                    return target[prop];
+                },
+                set: function(target, prop, value) {
+                    if (!isNaN(prop)) opsCount++; // 寫入 array[i] = x
+                    target[prop] = value;
+                    return true;
+                }
+            });
+            return { proxy, getCount: () => opsCount };
+        }
+
+        function isSorted(arr) {
+            for (let i = 0; i < arr.length - 1; i++) {
+                if (arr[i] > arr[i + 1]) return false;
+            }
+            return true;
+        }
+
+        async function runTests() {
+            testList.innerHTML = '';
+            hasError = false;
+            statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-blue-600 text-white animate-pulse";
+            statusBadge.innerText = "Processing...";
+            
+            // 產生測試資料
+            const data = Array.from({length: N}, () => Math.floor(Math.random() * 100000));
+            log(`產生 ${N} 筆隨機資料...`, 'info');
+
+            // 稍微延遲讓 UI 渲染
+            await new Promise(r => setTimeout(r, 100));
+
+            try {
+                if (typeof superSort !== 'function') {
+                    throw new Error("找不到 superSort 函式");
+                }
+
+                // 開始監控
+                const { proxy, getCount } = createMonitoredArray([...data]); // 複製一份以免汙染原資料
+                
+                const startTime = performance.now();
+                const sortedResult = superSort(proxy);
+                const endTime = performance.now();
+                
+                const totalOps = getCount();
+                const timeTaken = (endTime - startTime).toFixed(2);
+
+                log(`執行完畢，耗時 ${timeTaken}ms`, 'info');
+                log(`總操作次數 (Ops): ${totalOps}`, 'info');
+
+                // 檢查 1: 是否排序正確
+                if (isSorted(sortedResult) && sortedResult.length === N) {
+                    addResult("排序正確性", true, "陣列已正確由小到大排列");
+                } else {
+                    addResult("排序正確性", false, "陣列未正確排序或長度錯誤");
+                    log("錯誤：排序結果不正確", 'error');
+                }
+
+                // 檢查 2: 效能是否達標
+                if (totalOps <= MAX_OPS) {
+                    addResult("效能檢測", true, `消耗 ${totalOps} 次操作 (限制: ${MAX_OPS})`);
+                    log("效能優異！成功避開了 O(N^2) 的陷阱。", 'success');
+                } else {
+                    addResult("效能檢測", false, `消耗 ${totalOps} 次操作 (嚴重超標!)`);
+                    log(`警告：操作次數過多。如果是 Bubble Sort，次數通常在 50,000,000 以上。`, 'error');
+                }
+
+            } catch (e) {
+                log(`發生錯誤: ${e.message}`, 'error');
+                addResult("執行錯誤", false, e.message);
+            }
+
+            if (!hasError) {
+                statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-green-500 text-white";
+                statusBadge.innerText = "🎉 完美通過";
+            } else {
+                statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-red-500 text-white";
+                statusBadge.innerText = "⚠️ 測試失敗";
+            }
+        }
+    </script>
+</body>
+</html>
