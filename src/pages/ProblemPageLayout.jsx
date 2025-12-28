@@ -47,14 +47,14 @@ const ProblemPage = ({ handlePrev, handleNext, children, currentId }) => (
                 </button>
                 <span className="text-xs text-center mt-2 text-gray-500">
                     {
-                        currentId == 1 ? ("首頁") : ("上一題")
+                        currentId == 1 ? ("回首頁") : ("上一題")
                     }
                 </span>
             </div>
 
             {/* 中間：主要內容區 */}
             {children}
-            
+
             {/* 右側：下一題按鈕 */}
             <div className="hidden md:flex flex-col justify-center h-[calc(100vh-100px)] sticky top-20">
                 <button
@@ -63,7 +63,11 @@ const ProblemPage = ({ handlePrev, handleNext, children, currentId }) => (
                 >
                     <ChevronRight />
                 </button>
-                <span className="text-xs text-center mt-2 text-gray-500">下一題</span>
+                <span className="text-xs text-center mt-2 text-gray-500">
+                    {
+                        currentId == PageList.length ? ("回首頁") : ("下一題")
+                    }
+                </span>
             </div>
         </main>
     </div>
@@ -86,6 +90,8 @@ const ProblemPageLayout = () => {
         setMovingDirection('left')
         if (currentId < PageList.length) {
             navigate(`/problem/${currentId + 1}`);
+        } else {
+            navigate("/")
         }
     };
     useEffect(() => {
