@@ -46,7 +46,9 @@ class Car {
   introduce() {
     return "這是一台 " + this.brand;
   }
-}`}
+}
+
+// 以下請自行SportsCar, FamilyVan等等的類別`}
                         </SyntaxHighlighter>
                     </div>
 
