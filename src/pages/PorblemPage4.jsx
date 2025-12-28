@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import train_test from '../files/train_test.html?url'
+
 const ProblemPage4 = () => {
     const [carriages, setCarriages] = useState(['👻 列車長']);
 
@@ -23,40 +24,80 @@ const ProblemPage4 = () => {
                 <h2 className="text-2xl font-bold text-gray-800">幽靈列車調度員</h2>
             </section>
 
-            {/* 題目描述 */}
+            {/* 題目描述 (更新版) */}
             <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4 border-l-4 border-purple-600 pl-3">題目描述</h2>
                 <div className="prose max-w-none text-black leading-relaxed text-[18px]">
-                    <p>請使用 JavaScript 實作 <strong>Singly Linked List</strong> 來管理幽靈列車。</p>
+                    <h3 className="text-lg font-bold text-purple-900 mt-0">🚋 歡迎來到第 404 號冥界轉運站</h3>
+                    <p>
+                        嗨，菜鳥！歡迎加入「靈魂擺渡公司」。我是這裡的站長。
+                        我們負責駕駛這列傳說中的<strong>「幽靈列車 (The Phantom Express)」</strong>，將迷途的靈魂送往輪迴之門。
+                    </p>
+                    <p>
+                        這列火車採用了上古魔法結構 <strong>Singly Linked List (單向鏈結串列)</strong>。
+                        這裡的規則很簡單，但很嚴格：車廂之間不是用鐵鉤連著，而是用<strong>「靈魂鎖鏈 (next 指標)」</strong>。
+                    </p>
+                    
+                    <ul className="list-disc list-inside bg-purple-50 p-4 rounded-lg text-gray-700 text-base">
+                        <li><strong>Head (車頭)：</strong> 這是列車的動力來源，永遠指向第一節車廂。</li>
+                        <li><strong>Node (車廂)：</strong> 每一節車廂載著一個靈魂 (<code>value</code>)，並抓著下一節車廂 (<code>next</code>)。</li>
+                        <li><strong>Null (虛無斷崖)：</strong> 最後一節車廂的鎖鏈必須指向 <code>null</code>，代表列車的尾端，否則火車會失控衝出軌道！</li>
+                    </ul>
+
+                    <p className="mt-4">
+                        今天旅客特別多，你的調度面板壞了，必須手寫 JavaScript 咒語來控制列車。請完成以下操作：
+                    </p>
+
                     <div className="my-4 rounded-lg overflow-hidden shadow-lg text-sm">
                         <SyntaxHighlighter language="javascript" style={vscDarkPlus} showLineNumbers={true} customStyle={{ margin: 0, padding: '1.5rem' }}>
                             {`//把以下程式碼複製到linked_list.js，並實作append(value), toString(), removeLast()函式
 class Node {
   constructor(value) {
-    this.value = value;
-    this.next = null;
+    this.value = value; // 乘客 (靈魂)
+    this.next = null;   // 靈魂鎖鏈 (指向下一節)
   }
 }
 class LinkedList {
   constructor() {
-    this.head = null;
+    this.head = null; // 列車長 (車頭)
   }
-  append(value) {} // 實作它
-  toString() {}    // 實作它
-  removeLast() {} //實作它
+  append(value) {}    // 任務一：有新乘客上車 (掛在車尾)
+  toString() {}       // 任務二：點名 (列出所有乘客)
+  removeLast() {}     // 任務三：最後一位乘客下車
 }`}
                         </SyntaxHighlighter>
                     </div>
-                    <p className="font-bold mt-4 text-purple-900">任務目標：</p>
-                    <ul className="list-disc list-inside mt-2 space-y-1 text-gray-700">
-                        <li>實作 <code>append(value)</code>：將新車廂掛在列車尾端。</li>
-                        <li>實作 <code>toString()</code>：回傳如 <code>"列車長 -> 殭屍 -> null"</code> 的字串。</li>
-                        <li>實作 <code>removeLast()</code>：移除最後一節車廂。</li>
+
+                    <p className="font-bold mt-4 text-purple-900">詳細任務說明：</p>
+                    <ul className="list-decimal list-inside mt-2 space-y-2 text-gray-700">
+                        <li>
+                            <strong>加掛車廂 <code>append(value)</code>：</strong>
+                            <br />
+                            <span className="text-sm ml-5 block text-gray-600">
+                                有新的靈魂 (Value) 要上車。請將他包裝成 <code>Node</code>，並掛在列車的最尾端。
+                                <br />⚠️ 注意：如果列車目前是空的 (Head 為 null)，他就是第一節車廂！
+                            </span>
+                        </li>
+                        <li>
+                            <strong>全員點名 <code>toString()</code>：</strong>
+                            <br />
+                            <span className="text-sm ml-5 block text-gray-600">
+                                站長需要確認名單。請從車頭開始，沿著鎖鏈往後走，回傳如 <code>"列車長 -> 殭屍 -> 吸血鬼 -> null"</code> 的字串。
+                            </span>
+                        </li>
+                        <li>
+                            <strong>末節脫離 <code>removeLast()</code>：</strong>
+                            <br />
+                            <span className="text-sm ml-5 block text-gray-600">
+                                列車太重了，或者最後一位旅客到站了。請將最後一節車廂移除。
+                                <br />💡 提示：要把最後一節甩掉，你必須先找到「倒數第二節」，然後把它的鎖鏈 (next) 指向 <code>null</code>。
+                            </span>
+                        </li>
                     </ul>
                 </div>
             </section>
 
-            {/* 互動演示區 (略，保持原本的) */}
+            {/* 互動演示區 */}
             <section className="bg-purple-50 rounded-xl shadow-sm border border-purple-100 p-6 sm:p-8">
                 <h2 className="text-xl font-bold text-purple-900 mb-4 flex items-center gap-2">
                     <span className="text-2xl">🚂</span>
@@ -126,8 +167,8 @@ class LinkedList {
                         <p className="text-gray-300 text-sm">下載後與 linked_list.js 放在同目錄執行。</p>
                     </div>
                     <a
-                        href={train_test}      // 這裡綁定剛剛 import 進來的 url
-                        download="train_test.html"    // 指定下載時的檔名，不管原檔名是什麼，下載下來都會叫 test.html
+                        href={train_test}
+                        download="train_test.html"
                         className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow transition-transform hover:scale-105 active:scale-95 whitespace-nowrap decoration-0"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
@@ -144,15 +185,14 @@ class LinkedList {
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 font-bold text-slate-700">linked_list.js <span className="text-xs bg-red-200 px-2 ml-2 rounded">必要</span></div>
             </section>
 
-            {/* ✨ 這裡是你遺漏的提示區塊 ✨ */}
-            {/* 區塊 3: 提示 (已新增 removeLast 說明) */}
+            {/* 提示區塊 */}
             <section className="bg-yellow-50 rounded-xl shadow-sm border border-yellow-100 p-6 sm:p-8">
                 <h2 className="text-xl font-bold text-yellow-800 mb-3">
-                    💡 提示
+                    💡 菜鳥手冊 (Hints)
                 </h2>
                 <ul className="list-disc list-inside text-yellow-900/80 space-y-3 text-base">
                     <li>
-                        <strong>如何遍歷 (Traverse)？</strong> <br />
+                        <strong>如何巡視車廂 (Traverse)？</strong> <br />
                         你需要一個指針變數（例如 <code>let current = this.head;</code>）。使用 <code>while (current.next !== null)</code> 迴圈，讓指針一直往後跳 (<code>current = current.next</code>)，直到找到最後一節車廂。
                     </li>
                     <li>
@@ -163,7 +203,6 @@ class LinkedList {
                         <strong>關於 toString()：</strong> <br />
                         你可以建立一個空字串或陣列，在遍歷的過程中把 <code>current.value</code> 加進去，最後再回傳組合好的結果。
                     </li>
-                    {/* 新增這一段 */}
                     <li>
                         <strong>關於 removeLast()：</strong> <br />
                         <ul className="pl-10 mt-1 list-[square] space-y-1">
@@ -180,7 +219,6 @@ class LinkedList {
                     </li>
                 </ul>
             </section>
-
         </div>
     );
 };
