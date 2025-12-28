@@ -106,8 +106,6 @@
     </div>
 
     <script>
-        // 設定全域變數，方便學弟在 JS 裡取用 (或者讓他們自己貼網址)
-        // 請將下方的網址替換成你剛剛部署好的 Vercel 網址
         const API_ENDPOINT = "https://web-and-algo-prac-api.vercel.app/api/messages";
 
         // 更新 UI 顯示正確的 API 路徑
@@ -129,7 +127,7 @@
                     </div>
                 `;
 
-                // 呼叫學生寫的函式，並傳入真實的 API 網址
+                // 呼叫自主寫的函式，並傳入真實的 API 網址
                 renderMessages(API_ENDPOINT);
             } else {
                 alert("錯誤：找不到 renderMessages 函式！請確認 board_logic.js 已正確連結。");

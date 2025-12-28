@@ -26,15 +26,42 @@ const ProblemPage8 = () => {
                         請你撰寫一支程式 <code>board_logic.js</code>，負責從 API 撈取資料，篩選出 <strong>2024 年</strong> 的訊息，並將其顯示在留言板上。
                     </p>
 
+                    <div className="my-4 bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm">
+                        <h3 className="font-bold text-teal-800 mb-2">📡 API 規格 (Spec)</h3>
+                        <ul className="space-y-1 text-gray-700 font-mono">
+                            <li><strong>URL:</strong> <span className="text-blue-600">https://web-and-algo-prac-api.vercel.app/api/messages</span></li>
+                            <li><strong>Method:</strong> GET</li>
+                            <li><strong>Header:</strong> Content-Type: application/json</li>
+                            <li><strong>Body:</strong> <code>&#123;&#125;</code></li>
+                        </ul>
+                    </div>
+
+                    <p className="font-bold mt-4 text-teal-900">任務目標：</p>
+                    <p className="text-gray-700 mb-2">在 <code>board_logic.js</code> 中實作：</p>
+                    <div className="rounded-lg overflow-hidden shadow-lg text-sm mb-4">
+                        <SyntaxHighlighter language="javascript" style={vscDarkPlus} showLineNumbers={true} customStyle={{ margin: 0, padding: '1.5rem' }}>
+                            {`/**
+ * 從 API 取得留言，篩選 2024 年並「由新到舊」排序
+ * @param {string} apiUrl - API 的網址，已在demo_board.html中被傳入
+ */
+async function renderMessages(apiUrl) {
+    // 1.利用fetch向apiURL獲取資料
+    // 2.篩選出年份為2024年的資料
+    // 3.根據時間大小排序資料
+    // 4.將資料依下方模板規範渲染至message-board容器中
+}`}
+                        </SyntaxHighlighter>
+                    </div>
+
                     <p className="font-bold mt-4 text-indigo-900">任務流程：</p>
                     <ol className="list-decimal list-inside space-y-2 text-gray-700">
                         <li>使用 <code>fetch()</code> 向指定 API 取得留言陣列。</li>
                         <li>使用 <code>filter()</code> 篩選出 <code>timestamp</code> 年份為 <strong>2024</strong> 的資料。</li>
-                        <li>使用 <code>forEach()</code> 或 <code>map()</code> 遍歷篩選後的資料。</li>
                         <li>使用 <code>sort()</code> 將留言依時間倒序排列 (最新的在最前)。</li>
                         <li>依照下方的<strong>HTML模板</strong>製作元素，並使用 <code>forEach()</code> 遍歷資料並插入到 <code>#message-board</code> 容器中。</li>
                     </ol>
                 </div>
+
             </section>
 
             {/* 模板規範區 */}
