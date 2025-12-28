@@ -1,0 +1,44 @@
+/* 基礎卡片樣式 */
+.card {
+    position: relative; /* 關鍵：讓絕對定位的偽元素以此為基準 */
+    width: 200px;
+    padding: 20px;
+    background-color: #2d3748;
+    color: white;
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* 設定動畫過渡 */
+    margin: 10px;
+}
+
+/* 1. 偽類應用：滑鼠懸浮效果 */
+.card:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    z-index: 10;
+}
+
+/* 2. 偽元素應用：熱門標籤 */
+.popular::before {
+    content: "RARE";  /* 必要屬性 */
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #f59e0b; /* 金黃色 */
+    color: #451a03;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 12px; /* 跟卡片圓角切齊 */
+}
+
+/* 3. 偽類應用：中間卡片特別樣式 (也可直接用 .popular) */
+.card:nth-child(2) {
+    border: 2px solid #8b5cf6; /* 紫色邊框 */
+}
+
+/* 列表裝飾 */
+ul { padding-left: 20px; }
+li::marker {
+    content: "⚔️ "; /* 使用 Emoji 當作列表符號 */
+}
