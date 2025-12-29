@@ -11,6 +11,9 @@ import ProblemPage7 from './ProblemPage7';
 import ProblemPage8 from './ProblemPage8';
 import ProblemPage9 from './ProblemPage9';
 import ProblemPage10 from './ProblemPage10';
+import ProblemPage11 from './ProblemPage11';
+import ProblemPage12 from './ProblemPage12';
+import ProblemPage13 from './ProblemPage13';
 
 const ChevronLeft = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
@@ -30,7 +33,10 @@ const PageList = [
     <ProblemPage7 />,
     <ProblemPage8 />,
     <ProblemPage9 />,
-    <ProblemPage10 />
+    <ProblemPage10 />,
+    <ProblemPage11 />,
+    <ProblemPage12 />,
+    <ProblemPage13 />
 ]
 
 const ProblemPage = ({ handlePrev, handleNext, children, currentId }) => (

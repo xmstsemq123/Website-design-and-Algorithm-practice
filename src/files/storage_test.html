@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背包存檔系統 - 自動測評</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        .console-text { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen p-8 flex justify-center items-start">
+
+    <div class="w-full max-w-3xl space-y-6">
+        
+        <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+            <header class="bg-amber-900/80 p-6 border-b border-amber-700/50 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        💾 存檔檢測器 (Storage Inspector)
+                    </h1>
+                    <p class="text-amber-200 text-sm mt-1 opacity-80">LocalStorage & JSON Parsing</p>
+                </div>
+                <div id="status-badge" class="px-4 py-2 rounded-lg font-bold bg-gray-700 text-gray-400 text-sm">
+                    Ready
+                </div>
+            </header>
+
+            <div id="test-list" class="p-6 space-y-3"></div>
+
+            <div class="p-4 bg-gray-900/50 border-t border-gray-700 flex justify-end gap-3">
+                <button onclick="localStorage.clear(); location.reload();" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded font-bold text-sm">
+                    重置環境
+                </button>
+                <button onclick="runTests()" class="px-6 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded shadow-lg font-bold transition-transform hover:scale-105">
+                    執行檢測
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-black rounded-xl shadow-lg border border-gray-700 overflow-hidden font-mono text-xs md:text-sm h-64 flex flex-col">
+            <div class="bg-gray-800 px-4 py-2 text-gray-400 border-b border-gray-700">Debug Console</div>
+            <div id="console-output" class="flex-1 overflow-y-auto p-4 space-y-1 console-text text-gray-300">
+                <div class="opacity-50">> System initialized. Waiting for backpack.js...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="backpack.js"></script>
+
+    <script>
+        const testList = document.getElementById('test-list');
+        const consoleOutput = document.getElementById('console-output');
+        const statusBadge = document.getElementById('status-badge');
+        let hasError = false;
+        
+        // 題目指定的 Key
+        const TARGET_KEY = "my_backpack";
+
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            const time = new Date().toLocaleTimeString('en-US', {hour12:false});
+            div.className = type === 'error' ? "text-red-400" : type === 'success' ? "text-green-400" : "text-gray-300";
+            div.innerHTML = `<span class="opacity-50">[${time}]</span> ${msg}`;
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        function addResult(title, passed, detail) {
+            const div = document.createElement('div');
+            div.className = `flex justify-between items-center p-3 rounded border ${passed ? "bg-green-900/20 border-green-800" : "bg-red-900/20 border-red-800"}`;
+            div.innerHTML = `
+                <div>
+                    <span class="font-bold ${passed ? 'text-green-400' : 'text-red-400'}">${passed ? '✔ PASS' : '✘ FAIL'}</span>
+                    <span class="text-gray-200 ml-2 font-bold">${title}</span>
+                </div>
+                <div class="text-xs ${passed ? 'text-amber-300' : 'text-red-300'}">${detail}</div>
+            `;
+            testList.appendChild(div);
+            if (!passed) hasError = true;
+        }
+
+        async function runTests() {
+            testList.innerHTML = '';
+            hasError = false;
+            statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-blue-600 text-white animate-pulse";
+            statusBadge.innerText = "Running...";
+            
+            // 清空舊資料以確保測試準確
+            localStorage.removeItem(TARGET_KEY);
+            log("環境初始化：已清除 LocalStorage。", 'info');
+
+            try {
+                // 檢查 1: 函式是否存在
+                if (typeof saveItems !== 'function' || typeof loadItems !== 'function') {
+                    throw new Error("找不到 saveItems 或 loadItems 函式");
+                }
+                addResult("函式定義", true, "函式名稱正確");
+
+                // 檢查 2: 儲存功能 (saveItems)
+                const testData = [{id: 1, name: "Potion"}, {id: 2, name: "Sword"}];
+                saveItems(testData);
+                
+                const rawStorage = localStorage.getItem(TARGET_KEY);
+                if (rawStorage) {
+                    try {
+                        const parsed = JSON.parse(rawStorage);
+                        if (parsed.length === 2 && parsed[1].name === "Sword") {
+                            addResult("儲存功能", true, "成功寫入 LocalStorage 且格式正確");
+                            log("儲存測試通過", 'success');
+                        } else {
+                            addResult("儲存功能", false, "寫入的內容與預期不符");
+                        }
+                    } catch (e) {
+                        addResult("儲存功能", false, "LocalStorage 內的資料不是有效的 JSON");
+                        log("JSON Parse Error: " + rawStorage, 'error');
+                    }
+                } else {
+                    addResult("儲存功能", false, `LocalStorage 中找不到 Key: "${TARGET_KEY}"`);
+                }
+
+                // 檢查 3: 讀取功能 (loadItems)
+                // 手動注入資料
+                const mockData = JSON.stringify([{id: 99, name: "Legendary Shield"}]);
+                localStorage.setItem(TARGET_KEY, mockData);
+                
+                const loaded = loadItems();
+                if (Array.isArray(loaded) && loaded.length === 1 && loaded[0].name === "Legendary Shield") {
+                    addResult("讀取功能", true, "成功從 LocalStorage 還原陣列");
+                    log("讀取測試通過", 'success');
+                } else {
+                    addResult("讀取功能", false, "無法正確讀取或還原資料");
+                    log("讀取結果: " + JSON.stringify(loaded), 'error');
+                }
+
+                // 檢查 4: 空值處理
+                localStorage.removeItem(TARGET_KEY); // 清空
+                const emptyLoad = loadItems();
+                if (Array.isArray(emptyLoad) && emptyLoad.length === 0) {
+                    addResult("空值防呆", true, "無存檔時回傳空陣列 []");
+                } else {
+                    addResult("空值防呆", false, "無存檔時應回傳 []，卻回傳了 " + typeof emptyLoad);
+                }
+
+                // 檢查 5: 整合測試 (addItem)
+                // 先存一個
+                localStorage.setItem(TARGET_KEY, JSON.stringify([{id: 1, name: "Old Item"}]));
+                if (typeof addItem === 'function') {
+                    addItem("New Item"); // 應該要變成兩個
+                    const finalStorage = JSON.parse(localStorage.getItem(TARGET_KEY));
+                    if (finalStorage.length === 2 && finalStorage[1].name === "New Item") {
+                         addResult("新增道具 (整合)", true, "成功追加資料並保存");
+                    } else {
+                         addResult("新增道具 (整合)", false, "新增後資料長度或內容不正確");
+                    }
+                }
+
+            } catch (e) {
+                log(`執行錯誤: ${e.message}`, 'error');
+                addResult("執行錯誤", false, e.message);
+            }
+
+            if (!hasError) {
+                statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-green-500 text-white";
+                statusBadge.innerText = "🎉 完美存檔";
+                log("測試結束：你的背包系統運作正常！", 'success');
+            } else {
+                statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-red-500 text-white";
+                statusBadge.innerText = "⚠️ 測試失敗";
+            }
+        }
+    </script>
+</body>
+</html>

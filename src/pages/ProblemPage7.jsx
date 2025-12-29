@@ -12,7 +12,7 @@ const ProblemPage7 = () => {
       <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 flex justify-center items-center">
         <h2 className="text-2xl font-bold text-gray-800">第七題</h2>
         <div className='w-2 h-[10px] mx-2 bg-gray-800 rounded-3xl'></div>
-        <h2 className="text-2xl font-bold text-gray-800">AJAX非同步通訊的小試身手</h2>
+        <h2 className="text-2xl font-bold text-gray-800">AJAX的小試身手</h2>
       </section>
 
       {/* 題目描述 */}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法契約審判 - 自動測評</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        .console-text { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen p-8 flex justify-center items-start">
+
+    <div class="w-full max-w-3xl space-y-6">
+        
+        <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+            <header class="bg-purple-900/80 p-6 border-b border-purple-700/50 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        ⚖️ 契約審判者 (The Judge)
+                    </h1>
+                    <p class="text-purple-200 text-sm mt-1 opacity-80">Validation Logic Checker</p>
+                </div>
+                <div id="status-badge" class="px-4 py-2 rounded-lg font-bold bg-gray-700 text-gray-400 text-sm">
+                    Ready
+                </div>
+            </header>
+
+            <div id="test-list" class="p-6 space-y-3"></div>
+
+            <div class="p-4 bg-gray-900/50 border-t border-gray-700 flex justify-end gap-3">
+                <button onclick="runTests()" class="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded shadow-lg font-bold transition-transform hover:scale-105">
+                    開始審判
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-black rounded-xl shadow-lg border border-gray-700 overflow-hidden font-mono text-xs md:text-sm h-64 flex flex-col">
+            <div class="bg-gray-800 px-4 py-2 text-gray-400 border-b border-gray-700">Magical Log</div>
+            <div id="console-output" class="flex-1 overflow-y-auto p-4 space-y-1 console-text text-gray-300">
+                <div class="opacity-50">> Awaiting invocation...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="validator.js"></script>
+
+    <script>
+        const testList = document.getElementById('test-list');
+        const consoleOutput = document.getElementById('console-output');
+        const statusBadge = document.getElementById('status-badge');
+        let hasError = false;
+
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            const time = new Date().toLocaleTimeString('en-US', {hour12:false});
+            div.className = type === 'error' ? "text-red-400" : type === 'success' ? "text-green-400" : "text-gray-300";
+            div.innerHTML = `<span class="opacity-50">[${time}]</span> ${msg}`;
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        function addResult(title, passed, detail) {
+            const div = document.createElement('div');
+            div.className = `flex justify-between items-center p-3 rounded border ${passed ? "bg-green-900/20 border-green-800" : "bg-red-900/20 border-red-800"}`;
+            div.innerHTML = `
+                <div>
+                    <span class="font-bold ${passed ? 'text-green-400' : 'text-red-400'}">${passed ? '✔ PASS' : '✘ FAIL'}</span>
+                    <span class="text-gray-200 ml-2 font-bold">${title}</span>
+                </div>
+                <div class="text-xs ${passed ? 'text-purple-300' : 'text-red-300'}">${detail}</div>
+            `;
+            testList.appendChild(div);
+            if (!passed) hasError = true;
+        }
+
+        async function runTests() {
+            testList.innerHTML = '';
+            hasError = false;
+            statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-blue-600 text-white animate-pulse";
+            statusBadge.innerText = "Judging...";
+            
+            try {
+                // 1. 檢查函式存在
+                if (typeof validateUsername !== 'function' || typeof validatePassword !== 'function') {
+                    throw new Error("找不到 validateUsername 或 validatePassword 函式");
+                }
+                addResult("函式定義", true, "咒語結構完整");
+
+                // 2. 測試 Username
+                log("--- 開始驗證真名 (Username) ---");
+                const uTests = [
+                    { val: "Admin123", expect: true, desc: "標準英數組合" },
+                    { val: "hero", expect: true, desc: "純小寫英文" },
+                    { val: "999", expect: true, desc: "純數字" },
+                    { val: "Admin_123", expect: false, desc: "包含底線 (不允許)" },
+                    { val: "user name", expect: false, desc: "包含空白 (不允許)" },
+                    { val: "user@mail", expect: false, desc: "包含特殊符號 (不允許)" },
+                    { val: "", expect: false, desc: "空字串" },
+                ];
+                
+                let uPass = true;
+                for(let t of uTests) {
+                    const res = validateUsername(t.val);
+                    if(res !== t.expect) {
+                        uPass = false;
+                        log(`[Username Fail] 輸入: "${t.val}" / 預期: ${t.expect} / 實際: ${res}`, 'error');
+                    }
+                }
+                addResult("真名規則測試", uPass, uPass ? "所有英數規則通過" : "部分規則未通過 (請查看 Log)");
+
+
+                // 3. 測試 Password
+                log("--- 開始驗證靈魂印記 (Password) ---");
+                // 規則: >8, 含大寫, 含特殊符號
+                const pTests = [
+                    { val: "Pass123!", expect: false, desc: "剛好 8 字元 (應失敗，需 >8)" }, // 注意題目是 >8 還是 >=8? 題目寫 "長度必須 大於 8" (Length > 8)
+                    { val: "Password123!", expect: true, desc: "標準合格 (長度12, 有大寫, 有符號)" },
+                    { val: "password123!", expect: false, desc: "缺少大寫字母" },
+                    { val: "PASSWORD123!", expect: true, desc: "全大寫+符號 (合格)" }, 
+                    { val: "Password123", expect: false, desc: "缺少特殊符號" },
+                    { val: "Pass@word", expect: true, desc: "剛好 9 字元且符合規則" },
+                    { val: "Short!", expect: false, desc: "長度不足" },
+                ];
+
+                let pPass = true;
+                for(let t of pTests) {
+                    const res = validatePassword(t.val);
+                    if(res !== t.expect) {
+                        pPass = false;
+                        log(`[Password Fail] 輸入: "${t.val}" (${t.desc}) / 預期: ${t.expect} / 實際: ${res}`, 'error');
+                    }
+                }
+                addResult("印記規則測試", pPass, pPass ? "所有密碼強度規則通過" : "部分規則未通過 (請查看 Log)");
+
+
+            } catch (e) {
+                log(`執行錯誤: ${e.message}`, 'error');
+                addResult("執行錯誤", false, e.message);
+            }
+
+            if (!hasError) {
+                statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-green-500 text-white";
+                statusBadge.innerText = "🎉 契約成立";
+                log("審判結束：你的驗證邏輯完美無缺！", 'success');
+            } else {
+                statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-red-500 text-white";
+                statusBadge.innerText = "⚠️ 契約無效";
+            }
+        }
+    </script>
+</body>
+</html>

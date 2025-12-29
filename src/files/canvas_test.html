@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>煉金術畫布 - 自動測評</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        .console-text { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; }
+        canvas { cursor: crosshair; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen p-8 flex justify-center items-start">
+
+    <div class="w-full max-w-4xl space-y-6">
+        
+        <div class="bg-gray-800 rounded-xl shadow-lg border border-gray-700 overflow-hidden">
+            <header class="bg-indigo-900/80 p-6 border-b border-indigo-700/50 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        🎨 畫布檢測器 (Canvas Inspector)
+                    </h1>
+                    <p class="text-indigo-200 text-sm mt-1 opacity-80">Testing Context 2D Calls</p>
+                </div>
+                <div id="status-badge" class="px-4 py-2 rounded-lg font-bold bg-gray-700 text-gray-400 text-sm">
+                    Ready
+                </div>
+            </header>
+
+            <div id="test-list" class="p-6 space-y-3"></div>
+
+            <div class="p-4 bg-gray-900/50 border-t border-gray-700 flex justify-end gap-3">
+                <button onclick="runTests()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded shadow-lg font-bold transition-transform hover:scale-105">
+                    開始檢測
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded p-4 hidden">
+             <canvas id="transmutation-circle" width="500" height="300"></canvas>
+        </div>
+
+        <div class="bg-black rounded-xl shadow-lg border border-gray-700 overflow-hidden font-mono text-xs md:text-sm h-64 flex flex-col">
+            <div class="bg-gray-800 px-4 py-2 text-gray-400 border-b border-gray-700">Inspector Log</div>
+            <div id="console-output" class="flex-1 overflow-y-auto p-4 space-y-1 console-text text-gray-300">
+                <div class="opacity-50">> Waiting for alchemy.js...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="alchemy.js"></script>
+
+    <script>
+        const testList = document.getElementById('test-list');
+        const consoleOutput = document.getElementById('console-output');
+        const statusBadge = document.getElementById('status-badge');
+        let hasError = false;
+
+        // --- Mocking Tools ---
+        // 為了知道學生有沒有呼叫 ctx.moveTo, 我們必須攔截 Context
+        const actionsLog = [];
+        
+        // 備份原生的 getContext
+        const originalGetContext = HTMLCanvasElement.prototype.getContext;
+
+        // 建立一個 Mock Context (間諜物件)
+        const mockCtx = {
+            lineWidth: 1,
+            lineCap: '',
+            lineJoin: '',
+            strokeStyle: '#000000',
+            beginPath: () => actionsLog.push('beginPath'),
+            moveTo: (x, y) => actionsLog.push(`moveTo(${x}, ${y})`),
+            lineTo: (x, y) => actionsLog.push(`lineTo(${x}, ${y})`),
+            stroke: () => actionsLog.push('stroke'),
+            clearRect: (x, y, w, h) => actionsLog.push(`clearRect(${x}, ${y}, ${w}, ${h})`)
+        };
+
+        // 覆寫 getContext，回傳我們的間諜
+        HTMLCanvasElement.prototype.getContext = function(type) {
+            if (type === '2d') return mockCtx;
+            return originalGetContext.apply(this, arguments);
+        };
+
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type === 'error' ? "text-red-400" : type === 'success' ? "text-green-400" : "text-gray-300";
+            div.innerHTML = `> ${msg}`;
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        function addResult(title, passed, detail) {
+            const div = document.createElement('div');
+            div.className = `flex justify-between items-center p-3 rounded border ${passed ? "bg-green-900/20 border-green-800" : "bg-red-900/20 border-red-800"}`;
+            div.innerHTML = `
+                <div>
+                    <span class="font-bold ${passed ? 'text-green-400' : 'text-red-400'}">${passed ? '✔ PASS' : '✘ FAIL'}</span>
+                    <span class="text-gray-200 ml-2 font-bold">${title}</span>
+                </div>
+                <div class="text-xs ${passed ? 'text-indigo-300' : 'text-red-300'}">${detail}</div>
+            `;
+            testList.appendChild(div);
+            if (!passed) hasError = true;
+        }
+
+        // 模擬滑鼠事件的輔助函式
+        function triggerEvent(el, type, x, y) {
+            const evt = new MouseEvent(type, {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+                clientX: x, // 注意：真實環境要算 offset，這裡簡化模擬
+            });
+            // 為了讓學生用 e.offsetX 能取到值，我們暴力覆寫它
+            Object.defineProperty(evt, 'offsetX', { get: () => x });
+            Object.defineProperty(evt, 'offsetY', { get: () => y });
+            el.dispatchEvent(evt);
+        }
+
+        async function runTests() {
+            testList.innerHTML = '';
+            actionsLog.length = 0; // 清空紀錄
+            hasError = false;
+            statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-blue-600 text-white animate-pulse";
+            statusBadge.innerText = "Inspecting...";
+
+            const canvasEl = document.getElementById('transmutation-circle');
+
+            try {
+                // 1. 初始化檢查
+                if (typeof initCanvas !== 'function') throw new Error("找不到 initCanvas 函式");
+                initCanvas(); // 執行學生的初始化，這時應該會綁定事件
+                addResult("初始化", true, "initCanvas 執行成功");
+
+                // 2. 測試繪圖流程 (Mousedown -> Mousemove -> Stroke)
+                log("模擬繪圖：(10,10) -> (50,50)");
+                triggerEvent(canvasEl, 'mousedown', 10, 10);
+                triggerEvent(canvasEl, 'mousemove', 50, 50);
+                triggerEvent(canvasEl, 'mouseup', 50, 50);
+
+                // 檢查 Log
+                const hasBegin = actionsLog.includes('beginPath');
+                const hasMoveTo = actionsLog.includes('moveTo(10, 10)');
+                const hasLineTo = actionsLog.includes('lineTo(50, 50)');
+                const hasStroke = actionsLog.includes('stroke');
+
+                if (hasBegin && hasMoveTo) {
+                    addResult("起筆判定 (Start)", true, "正確呼叫 beginPath 與 moveTo");
+                } else {
+                    addResult("起筆判定 (Start)", false, "缺少 beginPath 或 moveTo");
+                }
+
+                if (hasLineTo && hasStroke) {
+                    addResult("繪圖判定 (Draw)", true, "正確呼叫 lineTo 與 stroke");
+                } else {
+                    addResult("繪圖判定 (Draw)", false, "滑鼠移動時未正確繪製線條");
+                }
+
+                // 3. 測試停止繪圖 (Mouseup 後再 Move 不應該畫圖)
+                actionsLog.length = 0; // 重置
+                triggerEvent(canvasEl, 'mousemove', 100, 100);
+                if (actionsLog.length === 0) {
+                    addResult("停筆判定 (Stop)", true, "放開滑鼠後停止繪製");
+                } else {
+                    addResult("停筆判定 (Stop)", false, "放開滑鼠後仍在繪製 (flag未重置?)");
+                }
+
+                // 4. 測試顏色切換
+                if (typeof setColor === 'function') {
+                    setColor('#ff0000');
+                    if (mockCtx.strokeStyle === '#ff0000') {
+                        addResult("墨水切換", true, "顏色設定成功");
+                    } else {
+                        addResult("墨水切換", false, "strokeStyle 未正確更新");
+                    }
+                } else {
+                    addResult("墨水切換", false, "找不到 setColor 函式");
+                }
+
+                // 5. 測試清除
+                if (typeof clearBoard === 'function') {
+                    actionsLog.length = 0;
+                    clearBoard();
+                    const hasClear = actionsLog.some(act => act.startsWith('clearRect'));
+                    if (hasClear) {
+                        addResult("洗刷畫布", true, "clearRect 呼叫成功");
+                    } else {
+                        addResult("洗刷畫布", false, "未呼叫 clearRect");
+                    }
+                }
+
+            } catch (e) {
+                log(`嚴重錯誤: ${e.message}`, 'error');
+                addResult("執行錯誤", false, e.message);
+            }
+
+            if (!hasError) {
+                statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-green-500 text-white";
+                statusBadge.innerText = "🎉 鍊成成功";
+                log("檢測結束：畫布功能運作正常！", 'success');
+            } else {
+                statusBadge.className = "px-4 py-2 rounded-lg font-bold bg-red-500 text-white";
+                statusBadge.innerText = "⚠️ 鍊成失敗";
+            }
+        }
+    </script>
+</body>
+</html>

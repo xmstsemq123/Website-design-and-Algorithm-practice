@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const ProblemPage2 = () => {
   // --- 範例部分的 React 邏輯 (模擬作業解答) ---
@@ -44,8 +46,9 @@ const ProblemPage2 = () => {
     }
   };
 
-  return (<>
+  return (
     <div className="w-full max-w-4xl space-y-6">
+      
       {/* 標題區 */}
       <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 flex justify-center items-center">
         <h2 className="text-2xl font-bold text-gray-800">
@@ -63,16 +66,44 @@ const ProblemPage2 = () => {
           題目描述
         </h2>
         <div className="prose max-w-none text-black leading-relaxed text-[18px]">
-          <p>請實作一個 JavaScript 函數 <code>drawCard()</code>，該函數必須回傳一個 <strong>Promise</strong> 物件。</p>
-          <ul className="list-disc list-inside mt-2 space-y-1">
-            <li>Promise 內部需使用 <code>setTimeout</code> 模擬 <strong>2秒</strong> 的延遲時間。</li>
+          <p>
+            請從零開始，使用 HTML、CSS 與 JavaScript 製作一個<strong>完整的抽卡網頁</strong>。
+            你不需要依賴任何框架，請直接操作 DOM 來完成畫面更新。
+          </p>
+
+          <h3 className="font-bold text-lg mt-4 text-gray-700">1. 介面要求 (HTML/CSS)</h3>
+          <ul className="list-disc list-inside mt-2 space-y-1 text-gray-600">
+            <li><strong>結果顯示區：</strong> 在畫面上方放置一個區塊（例如 <code>div</code>），預設文字為「點擊按鈕開始抽卡」。請加上邊框、背景色等樣式，讓它看起來像一張卡片或螢幕。</li>
+            <li><strong>操作按鈕：</strong> 在下方放置一個按鈕 <code>button</code>，文字為「開始抽卡」。</li>
+          </ul>
+
+          <h3 className="font-bold text-lg mt-4 text-gray-700">2. 程式邏輯 (JavaScript)</h3>
+          <p>請實作一個函式 <code>drawCard()</code>，該函式必須回傳一個 <strong>Promise</strong>：</p>
+          <ul className="list-disc list-inside mt-2 space-y-1 text-gray-600">
+            <li>Promise 內部使用 <code>setTimeout</code> 模擬 <strong>2秒</strong> 的伺服器延遲。</li>
             <li>延遲結束後，使用 <code>Math.random()</code> 決定結果：
-              <ul className="pl-6 list-[circle] text-gray-600">
-                <li>如果隨機數大於 0.5，判定為<strong>成功</strong>，請呼叫 <code>resolve</code> 並帶入字串 "SSR: 抽到大獎！"。</li>
-                <li>如果隨機數小於等於 0.5，判定為<strong>失敗</strong>，請呼叫 <code>reject</code> 並帶入字串 "N: 沒抽中..."。</li>
+              <ul className="pl-6 list-[circle]">
+                <li><strong>&gt; 0.5 (成功)</strong>：呼叫 <code>resolve("SSR: 抽到大獎！")</code></li>
+                <li><strong>&le; 0.5 (失敗)</strong>：呼叫 <code>reject("N: 沒抽中...")</code></li>
               </ul>
             </li>
-            <li>在 HTML 中製作一個按鈕與顯示區域，點擊按鈕後呼叫該函數，並利用 <code>.then()</code> 與 <code>.catch()</code> (或 async/await) 將結果顯示在畫面上。</li>
+          </ul>
+
+          <h3 className="font-bold text-lg mt-4 text-gray-700">3. 互動流程</h3>
+          <ul className="list-disc list-inside mt-2 space-y-1 text-gray-600">
+            <li>當使用者點擊按鈕時：
+                <ol className="pl-6 list-decimal mt-1 space-y-1">
+                    <li>修改顯示區文字為 <strong>「抽卡中...」</strong>。</li>
+                    <li>(選用) 讓按鈕變成不可點擊 (Disabled) 狀態，避免重複觸發。</li>
+                    <li>呼叫 <code>drawCard()</code>。</li>
+                </ol>
+            </li>
+            <li>接收到 Promise 結果後（使用 <code>.then</code> 或 <code>.catch</code>）：
+                <ol className="pl-6 list-decimal mt-1 space-y-1">
+                    <li>將回傳的文字顯示在結果顯示區。</li>
+                    <li>(選用) 依據成功或失敗，改變顯示區的背景顏色（例如：中獎顯示金色、失敗顯示灰色）。</li>
+                </ol>
+            </li>
           </ul>
         </div>
       </section>
@@ -81,10 +112,11 @@ const ProblemPage2 = () => {
       <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
         <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-          範例演示
+          預期成果演示
         </h2>
+        <p className="text-gray-500 mb-4 text-sm">下方是你的網頁完成後，預期應該要有的互動行為：</p>
         
-        <div className='flex flex-col items-center justify-center p-8 bg-slate-50 rounded-xl gap-6'>
+        <div className='flex flex-col items-center justify-center p-8 bg-slate-50 rounded-xl gap-6 border border-slate-200'>
           {/* 顯示結果的螢幕 */}
           <div className={`w-full max-w-md h-32 flex items-center justify-center border-2 rounded-xl text-xl font-bold transition-all duration-300 ${getBoxStyle()}`}>
             {message}
@@ -112,16 +144,17 @@ const ProblemPage2 = () => {
             <li className='space-x-2'>
               <span>HW-2.html</span>
               <span className="text-xs bg-red-200 px-2 py-0.5 rounded text-gray-600">必要</span>
+              <span className="text-xs text-gray-400 font-normal ml-2">(包含 HTML 結構)</span>
             </li>
             <li className='space-x-2'>
               <span>HW-2.css</span>
               <span className="text-xs bg-green-200 px-2 py-0.5 rounded text-gray-600">可選</span>
-              <span className="text-xs bg-blue-200 px-2 py-0.5 rounded text-gray-600">可直接嵌入html</span>
+              <span className="text-xs bg-blue-200 px-2 py-0.5 rounded text-gray-600">可直接嵌入 HTML</span>
             </li>
             <li className='space-x-2'>
               <span>HW-2.js</span> 
               <span className="text-xs bg-green-200 px-2 py-0.5 rounded text-gray-600">可選</span>
-              <span className="text-xs bg-blue-200 px-2 py-0.5 rounded text-gray-600">可直接嵌入html</span>
+              <span className="text-xs bg-blue-200 px-2 py-0.5 rounded text-gray-600">可直接嵌入 HTML</span>
             </li>
           </ul>
         </div>
@@ -133,12 +166,22 @@ const ProblemPage2 = () => {
           💡 提示
         </h2>
         <ul className="list-disc list-inside text-yellow-900/80 space-y-2">
-          <li>建立 Promise 的基本語法：<code>new Promise((resolve, reject) =&gt; &#123; ... &#125;)</code>。</li>
-          <li>在等待期間（Pending 狀態），可以先修改 DOM 顯示「抽卡中...」，提升使用者體驗。</li>
+          <li>
+            <strong>DOM 操作：</strong> 使用 <code>document.getElementById('id名稱')</code> 或 <code>document.querySelector('.class名稱')</code> 來選取你的 HTML 元素。
+          </li>
+          <li>
+            <strong>修改內容：</strong> 選取元素後，可以使用 <code>element.textContent = "新文字"</code> 來修改顯示內容。
+          </li>
+          <li>
+            <strong>事件監聽：</strong> 使用 <code>button.addEventListener('click', function() &#123; ... &#125;)</code> 來綁定點擊事件。
+          </li>
+          <li>
+            <strong>Promise：</strong> 建立 Promise 的語法為 <code>new Promise((resolve, reject) =&gt; &#123; ... &#125;)</code>。
+          </li>
         </ul>
       </section>
     </div>
-  </>);
+  );
 };
 
 export default ProblemPage2;

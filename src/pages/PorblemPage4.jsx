@@ -82,7 +82,7 @@ class LinkedList {
                             <strong>全員點名 <code>toString()</code>：</strong>
                             <br />
                             <span className="text-sm ml-5 block text-gray-600">
-                                站長需要確認名單。請從車頭開始，沿著鎖鏈往後走，回傳如 <code>"列車長 -> 殭屍 -> 吸血鬼 -> null"</code> 的字串。
+                                站長需要確認名單。請從車頭開始，沿著鎖鏈往後走，回傳如 <code>"列車長 -{`>`} 殭屍 -{`>`} 吸血鬼 -{`>`} null"</code> 的字串。
                             </span>
                         </li>
                         <li>

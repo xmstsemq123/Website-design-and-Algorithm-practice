@@ -76,6 +76,27 @@ export default function Home() {
       tag: "Sort",
       color: "text-rose-600 bg-rose-50 border-rose-200" // 玫瑰紅：代表混沌、修正
     },
+    {
+      id: 11,
+      title: "冒險者的背包",
+      desc: "LocalStorage 資料持久化",
+      tag: "Storage",
+      color: "text-emerald-600 bg-emerald-50 border-emerald-200" // 寶石綠：代表存檔、貴重物品
+    },
+    {
+      id: 12,
+      title: "禁忌的魔法契約",
+      desc: "Form Validation 表單驗證 (Regex)",
+      tag: "Form & Regex",
+      color: "text-slate-600 bg-slate-50 border-slate-200" // 深岩灰：代表嚴肅的契約、規則
+    },
+    {
+      id: 13,
+      title: "煉金術畫布",
+      desc: "HTML5 Canvas 繪圖實作",
+      tag: "Canvas API",
+      color: "text-fuchsia-600 bg-fuchsia-50 border-fuchsia-200" // 桃紅色：代表魔法、煉金術
+    },
   ];
 
   return (
